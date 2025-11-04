@@ -8,19 +8,16 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, LabelEncoder, MinMaxScaler
 import io
 
-# Configuración de la página
 st.set_page_config(
     page_title="Procesamiento de Datasets ML",
     page_icon="📊",
     layout="wide"
 )
 
-# Título principal
 st.title("📊 Procesamiento de Datasets en Machine Learning")
 st.markdown("**Actividad Individual - Sistemas Inteligentes**")
 st.markdown("---")
 
-# Sidebar para navegación
 st.sidebar.title("🔍 Navegación")
 ejercicio = st.sidebar.radio(
     "Selecciona un ejercicio:",
@@ -49,7 +46,6 @@ if ejercicio == "Ejercicio 1: Titanic":
         datos = pd.read_csv(archivo_cargado)
         st.success("✅ Archivo cargado correctamente")
         
-        # 1. EXPLORACIÓN INICIAL
         st.subheader("1️⃣ Exploración Inicial")
         col1, col2 = st.columns(2)
         
@@ -66,18 +62,14 @@ if ejercicio == "Ejercicio 1: Titanic":
         st.markdown("**Estadísticas Descriptivas:**")
         st.dataframe(datos.describe())
         
-        # 2. LIMPIEZA DE DATOS
         st.subheader("2️⃣ Limpieza de Datos")
         
-        # Copiar dataframe
         datos_limpios = datos.copy()
         
-        # Eliminar columnas irrelevantes
         st.markdown("**Columnas eliminadas:** Name, Ticket, Cabin, PassengerId")
         columnas_eliminar = ['Name', 'Ticket', 'Cabin', 'PassengerId']
         datos_limpios = datos_limpios.drop(columnas_eliminar, axis=1, errors='ignore')
         
-        # Manejo de valores nulos
         st.markdown("**Manejo de valores nulos:**")
         media_edad = datos_limpios['Age'].mean()
         media_tarifa = datos_limpios['Fare'].mean()
@@ -91,7 +83,6 @@ if ejercicio == "Ejercicio 1: Titanic":
         datos_limpios['Fare'].fillna(media_tarifa, inplace=True)
         datos_limpios['Embarked'].fillna(moda_embarque, inplace=True)
         
-        # 3. CODIFICACIÓN
         st.subheader("3️⃣ Codificación de Variables Categóricas")
         
         codificador_sexo = LabelEncoder()
@@ -102,18 +93,15 @@ if ejercicio == "Ejercicio 1: Titanic":
         datos_limpios['Embarked'] = codificador_embarque.fit_transform(datos_limpios['Embarked'])
         st.write("**Embarked codificado:**", dict(zip(codificador_embarque.classes_, codificador_embarque.transform(codificador_embarque.classes_))))
         
-        # 4. ESTANDARIZACIÓN
         st.subheader("4️⃣ Estandarización")
         
         escalador = StandardScaler()
         datos_limpios[['Age', 'Fare']] = escalador.fit_transform(datos_limpios[['Age', 'Fare']])
         st.success("✅ Variables estandarizadas: Age, Fare")
         
-        # 5. PRIMEROS 5 REGISTROS PROCESADOS
         st.subheader("📋 Primeros 5 Registros Procesados")
         st.dataframe(datos_limpios.head())
         
-        # 6. DIVISIÓN DE DATOS
         st.subheader("5️⃣ División en Conjuntos de Entrenamiento y Prueba")
         
         caracteristicas = datos_limpios.drop('Survived', axis=1)
@@ -145,7 +133,6 @@ elif ejercicio == "Ejercicio 2: Student Performance":
     archivo_cargado = st.file_uploader("📁 Sube tu archivo student-mat.csv", type=['csv'])
     
     if archivo_cargado is not None:
-        # Intentar con diferentes separadores
         try:
             datos = pd.read_csv(archivo_cargado, sep=';')
         except:
@@ -153,7 +140,6 @@ elif ejercicio == "Ejercicio 2: Student Performance":
         
         st.success("✅ Archivo cargado correctamente")
         
-        # 1. EXPLORACIÓN INICIAL
         st.subheader("1️⃣ Carga y Exploración")
         
         col1, col2 = st.columns(2)
@@ -168,7 +154,6 @@ elif ejercicio == "Ejercicio 2: Student Performance":
             columnas_categoricas = datos.select_dtypes(include=['object']).columns.tolist()
             st.write(columnas_categoricas)
         
-        # 2. LIMPIEZA DE DATOS
         st.subheader("2️⃣ Limpieza de Datos")
         
         datos_limpios = datos.copy()
@@ -179,7 +164,6 @@ elif ejercicio == "Ejercicio 2: Student Performance":
         st.write(f"**Duplicados eliminados:** {filas_antes - filas_despues}")
         st.success("✅ Verificación de valores inconsistentes completada")
         
-        # 3. ONE HOT ENCODING
         st.subheader("3️⃣ One-Hot Encoding")
         
         variables_categoricas = ['school', 'sex', 'address', 'famsize', 'Pstatus', 
@@ -187,7 +171,6 @@ elif ejercicio == "Ejercicio 2: Student Performance":
                                 'famsup', 'paid', 'activities', 'nursery', 'higher', 
                                 'internet', 'romantic']
         
-        # Verificar qué variables categóricas existen en el dataset
         variables_existentes = [var for var in variables_categoricas if var in datos_limpios.columns]
         
         datos_codificados = pd.get_dummies(datos_limpios, columns=variables_existentes, drop_first=True)
@@ -195,11 +178,9 @@ elif ejercicio == "Ejercicio 2: Student Performance":
         st.write(f"**Columnas totales después de encoding:** {datos_codificados.shape[1]}")
         st.info("💡 drop_first=True aplicado para evitar multicolinealidad")
         
-        # 4. NORMALIZACIÓN
         st.subheader("4️⃣ Normalización")
         
         variables_numericas = ['age', 'absences', 'G1', 'G2']
-        # Verificar qué variables numéricas existen
         variables_num_existentes = [var for var in variables_numericas if var in datos_codificados.columns]
         
         if len(variables_num_existentes) > 0:
@@ -210,8 +191,7 @@ elif ejercicio == "Ejercicio 2: Student Performance":
             st.warning("⚠️ No se encontraron las variables numéricas esperadas (age, absences, G1, G2)")
             st.info("Columnas disponibles en el dataset:")
             st.write(list(datos_codificados.columns))
-        
-        # 5. SEPARACIÓN X e y
+
         st.subheader("5️⃣ Separación de Variables")
         
         caracteristicas = datos_codificados.drop('G3', axis=1)
@@ -223,7 +203,6 @@ elif ejercicio == "Ejercicio 2: Student Performance":
         with col2:
             st.write(f"**y (objetivo G3):** {objetivo.shape}")
         
-        # 6. DIVISIÓN DE DATOS
         st.subheader("6️⃣ División de Datos")
         
         X_entrenamiento, X_prueba, y_entrenamiento, y_prueba = train_test_split(
@@ -241,7 +220,6 @@ elif ejercicio == "Ejercicio 2: Student Performance":
         st.write(f"**Shape de entrenamiento:** {X_entrenamiento.shape}")
         st.write(f"**Shape de prueba:** {X_prueba.shape}")
         
-        # RETO ADICIONAL: CORRELACIÓN
         st.subheader("🎯 Reto Adicional: Análisis de Correlación")
         
         matriz_correlacion = datos_limpios[['G1', 'G2', 'G3']].corr()
@@ -270,11 +248,10 @@ elif ejercicio == "Ejercicio 2: Student Performance":
         st.info("👆 Por favor, carga el archivo student-mat.csv para comenzar el análisis")
 
 # ==================== EJERCICIO 3: IRIS ====================
-else:  # Ejercicio 3: Iris
+else:  
     st.header("🌸 Ejercicio 3: Dataset Iris")
     st.markdown("**Objetivo:** Implementar un flujo completo de preprocesamiento y visualizar resultados.")
     
-    # 1. CARGA DEL DATASET
     st.subheader("1️⃣ Carga del Dataset")
     
     datos_iris = load_iris()
@@ -283,7 +260,6 @@ else:  # Ejercicio 3: Iris
     st.write(f"**Número de características:** {datos_iris.data.shape[1]}")
     st.write(f"**Clases:** {', '.join(datos_iris.target_names)}")
     
-    # 2. CONVERSIÓN A DATAFRAME
     st.subheader("2️⃣ Conversión a DataFrame")
     
     df_iris = pd.DataFrame(data=datos_iris.data, columns=datos_iris.feature_names)
@@ -291,8 +267,7 @@ else:  # Ejercicio 3: Iris
     
     st.markdown("**Primeras 5 filas:**")
     st.dataframe(df_iris.head())
-    
-    # Exploración inicial
+
     st.subheader("📊 Exploración Inicial")
     
     col1, col2 = st.columns(2)
@@ -311,8 +286,7 @@ else:  # Ejercicio 3: Iris
     
     st.markdown("**Estadísticas Descriptivas (datos originales):**")
     st.dataframe(df_iris.describe())
-    
-    # 3. ESTANDARIZACIÓN
+
     st.subheader("3️⃣ Estandarización")
     
     caracteristicas = df_iris.drop('target', axis=1)
@@ -329,7 +303,6 @@ else:  # Ejercicio 3: Iris
     st.dataframe(df_estandarizado.describe())
     st.info("💡 Nota: Media ≈ 0, Desviación estándar ≈ 1")
     
-    # 4. DIVISIÓN DE DATOS
     st.subheader("4️⃣ División de Datos")
     
     X_entrenamiento, X_prueba, y_entrenamiento, y_prueba = train_test_split(
@@ -347,7 +320,6 @@ else:  # Ejercicio 3: Iris
     st.write(f"**Shape de entrenamiento:** {X_entrenamiento.shape}")
     st.write(f"**Shape de prueba:** {X_prueba.shape}")
     
-    # 5. VISUALIZACIÓN
     st.subheader("5️⃣ Visualización")
     st.markdown("**Gráfico de dispersión: Sepal Length vs Petal Length por Clase**")
     
@@ -359,8 +331,8 @@ else:  # Ejercicio 3: Iris
     for i, nombre_especie in enumerate(datos_iris.target_names):
         mascara = etiquetas == i
         ax.scatter(
-            caracteristicas_escaladas[mascara, 0],  # sepal length (columna 0)
-            caracteristicas_escaladas[mascara, 2],  # petal length (columna 2)
+            caracteristicas_escaladas[mascara, 0],  
+            caracteristicas_escaladas[mascara, 2],  
             c=colores[i],
             label=nombre_especie,
             alpha=0.7,
@@ -383,8 +355,7 @@ else:  # Ejercicio 3: Iris
     st.write("- Las tres especies se separan claramente en el espacio bidimensional")
     st.write("- Setosa (rojo) se distingue fácilmente de las otras dos especies")
     st.write("- Versicolor (verde) y Virginica (azul) tienen cierta superposición")
-    
-    # Gráfico adicional: Todas las características
+
     st.markdown("**Gráfico de Pares (Pairplot):**")
     
     fig, axes = plt.subplots(2, 2, figsize=(12, 10))
@@ -407,7 +378,6 @@ else:  # Ejercicio 3: Iris
     
     st.success("✅ Ejercicio 3 completado exitosamente")
 
-# Footer
 st.markdown("---")
 st.markdown("### 📝 Resumen de Salidas Esperadas")
 
